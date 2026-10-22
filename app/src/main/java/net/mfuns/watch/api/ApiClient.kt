@@ -46,8 +46,10 @@ class ApiClient {
     }
 
     private fun request(path: String, query: Map<String, Any?> = emptyMap()): String {
+        val fullUrl = url(path, query)
+        android.util.Log.i("MFUNS_API", "GET $fullUrl")
         val req = Request.Builder()
-            .url(url(path, query))
+            .url(fullUrl)
             .header("User-Agent", USER_AGENT)
             .header("Accept", "application/json")
             .apply { if (authToken.isNotEmpty()) header("Authorization", authToken) }
@@ -57,6 +59,7 @@ class ApiClient {
     }
 
     private fun postForm(path: String, form: Map<String, Any?>): String {
+        android.util.Log.i("MFUNS_API", "POST_FORM $path $form")
         val builder = FormBody.Builder()
         form.forEach { (k, v) -> if (v != null) builder.add(k, "$v") }
         val req = Request.Builder()
@@ -70,6 +73,7 @@ class ApiClient {
     }
 
     private fun postJson(path: String, body: Map<String, Any?>): String {
+        android.util.Log.i("MFUNS_API", "POST_JSON $path $body")
         val payload = body.entries
             .filter { it.value != null }
             .joinToString(",", "{", "}") { (k, v) ->
@@ -111,7 +115,10 @@ class ApiClient {
         val code = root["code"].asInt() ?: 0
         val msg = root["msg"]?.asString() ?: "请求失败"
         val data = root["data"]
-        if (code != 1) throw ApiException(code, msg.ifEmpty { "请求失败($code)" })
+        if (code != 1) {
+            android.util.Log.e("MFUNS_API", "ERR code=$code msg=$msg body=${body.take(200)}")
+            throw ApiException(code, msg.ifEmpty { "请求失败($code)" })
+        }
         return Envelope(code, msg, data)
     }
 

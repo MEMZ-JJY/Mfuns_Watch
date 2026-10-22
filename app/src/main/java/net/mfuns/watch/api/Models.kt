@@ -105,33 +105,79 @@ object Parser {
 
     fun contentItem(raw: JsonElement): ContentItem? {
         val obj = raw.asObj()
-        val resource = obj["resource_info"]?.asObj() ?: JsonObject(emptyMap())
-        val source = if (resource.isNotEmpty()) obj + resource else obj
+        val resourceInfo = obj["resource_info"]?.asObj() ?: JsonObject(emptyMap())
+        val extra = obj["extra"]?.asObj() ?: JsonObject(emptyMap())
+        val referenced = extra["resource"]?.asObj() ?: JsonObject(emptyMap())
+        val autoSync = obj["is_auto_sync"]?.asBool() ?: false
+        val feedResourceId = obj["resource_id"]?.asInt()
+        val feedResourceType = obj["resource_type"]?.asInt()
+
+        if (referenced.isNotEmpty() || (autoSync && feedResourceId != null && feedResourceId > 0)) {
+            val source = if (referenced.isNotEmpty()) referenced else obj
+            val user = (source["user"]?.asObj()?.takeIf { it.isNotEmpty() }
+                ?: obj["user"]?.asObj() ?: JsonObject(emptyMap()))
+            val category = source["category"]?.asObj() ?: JsonObject(emptyMap())
+            val id = source["id"]?.asInt() ?: feedResourceId ?: return null
+            if (id == 0) return null
+            return ContentItem(
+                id = id,
+                title = source["title"]?.asString()?.ifEmpty { "未命名内容" } ?: "未命名内容",
+                summary = plainText(
+                    source["summary"]?.asString() ?: source["content"]?.asString() ?: "",
+                ),
+                cover = coverUrl(source["cover"]?.asString() ?: ""),
+                author = user["name"]?.asString() ?: user["username"]?.asString()
+                    ?: obj["user_name"]?.asString() ?: "",
+                authorId = user["id"]?.asInt() ?: user["user_id"]?.asInt(),
+                authorAvatar = coverUrl(user["avatar"]?.asString() ?: user["face"]?.asString() ?: ""),
+                category = category["name"]?.asString() ?: "",
+                type = source["type"]?.asInt() ?: feedResourceType ?: ResourceType.ARTICLE,
+                likes = source["like_count"]?.asInt() ?: 0,
+                comments = source["comment_count"]?.asInt() ?: 0,
+                views = source["view_count"]?.asInt() ?: 0,
+                createdAt = parseTime(source["created_at"] ?: obj["created_at"]),
+            )
+        }
+
+        val source = if (resourceInfo.isNotEmpty()) obj + resourceInfo else obj
         val user = source["user"]?.asObj() ?: JsonObject(emptyMap())
         val category = source["category"]?.asObj() ?: JsonObject(emptyMap())
         val id = source["id"]?.asInt() ?: source["resource_id"]?.asInt() ?: return null
         if (id == 0) return null
+        val isFeedEntry = obj["resource_type"]?.asInt() == ResourceType.FEED ||
+            obj["extra_type"] != null
+        val type = when {
+            isFeedEntry -> ResourceType.FEED
+            else -> resourceType(
+                (source["type"]?.asString() ?: source["resource_type"]?.asString()).orEmpty(),
+            )
+        }
+        val feedCover = feedCoverUrl(extra["images"])
         return ContentItem(
             id = id,
             title = source["title"]?.asString()?.ifEmpty { "未命名内容" } ?: "未命名内容",
             summary = plainText(
                 source["summary"]?.asString() ?: source["content"]?.asString() ?: "",
             ),
-            cover = coverUrl(source["cover"]?.asString() ?: ""),
+            cover = coverUrl(source["cover"]?.asString() ?: "").ifEmpty { feedCover },
             author = user["name"]?.asString() ?: user["username"]?.asString()
                 ?: source["user_name"]?.asString() ?: "",
             authorId = user["id"]?.asInt() ?: user["user_id"]?.asInt() ?: source["user_id"]?.asInt(),
             authorAvatar = coverUrl(user["avatar"]?.asString() ?: user["face"]?.asString() ?: ""),
             category = category["name"]?.asString() ?: source["category_name"]?.asString()
                 ?: source["tag"]?.asString() ?: "",
-            type = resourceType(
-                (source["type"]?.asString() ?: source["resource_type"]?.asString()).orEmpty(),
-            ),
+            type = type,
             likes = source["like_count"]?.asInt() ?: 0,
             comments = source["comment_count"]?.asInt() ?: 0,
             views = source["view_count"]?.asInt() ?: 0,
             createdAt = parseTime(source["created_at"] ?: source["time"]),
         )
+    }
+
+    private fun feedCoverUrl(raw: JsonElement?): String {
+        val first = raw.asList().firstOrNull() ?: return ""
+        val url = first.asObj()["url"]?.asString() ?: first.asString()
+        return coverUrl(url)
     }
 
     fun contentList(data: JsonElement?): List<ContentItem> {
@@ -358,6 +404,7 @@ object Parser {
         }
         return ContentDetail(
             item = base.copy(
+                type = type,
                 author = user["name"]?.asString() ?: user["username"]?.asString() ?: base.author,
                 authorAvatar = coverUrl(
                     user["avatar"]?.asString() ?: user["face"]?.asString() ?: "",
