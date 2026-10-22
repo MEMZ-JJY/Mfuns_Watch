@@ -41,8 +41,8 @@ fun AboutScreen(
         }
         item {
             Text(
-                text = "数据来源于 Mfuns 社区公开接口（api.mfuns.net），" +
-                    "为非官方第三方客户端，仅供学习交流使用。",
+                text = "数据来源于 Mfuns 社区公开接口，本软件非官方，" +
+                    "由 Sakurazuki 制作 Moon公式 版权所有",
                 style = MaterialTheme.typography.caption2,
                 color = MaterialTheme.colors.onSurfaceVariant,
                 textAlign = TextAlign.Center,
