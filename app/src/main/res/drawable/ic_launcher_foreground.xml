@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 猫头剪影：耳朵 + 脸 + 眼睛，构成"喵"图标 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 左耳 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,30 L30,14 L48,24 Z" />
+    <!-- 右耳 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M74,30 L78,14 L60,24 Z" />
+    <!-- 脸 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,30 C70,30 80,40 80,55 C80,71 68,82 54,82 C40,82 28,71 28,55 C28,40 38,30 54,30 Z" />
+    <!-- 左眼 -->
+    <path
+        android:fillColor="#FB7299"
+        android:pathData="M45,52 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <!-- 右眼 -->
+    <path
+        android:fillColor="#FB7299"
+        android:pathData="M63,52 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <!-- 嘴 -->
+    <path
+        android:fillColor="#FB7299"
+        android:pathData="M50,62 L54,67 L58,62 Z" />
+</vector>
