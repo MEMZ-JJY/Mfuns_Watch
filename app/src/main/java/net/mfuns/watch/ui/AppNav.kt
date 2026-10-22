@@ -5,10 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
+import androidx.wear.compose.navigation.WearNavigator
+import androidx.wear.compose.navigation.composable
 import net.mfuns.watch.data.SessionStore
 import net.mfuns.watch.ui.screens.AboutScreen
 import net.mfuns.watch.ui.screens.CategoryScreen
@@ -48,6 +49,8 @@ fun AppNavHost(
     session: SessionStore.Session,
 ) {
     val navController = rememberNavController()
+
+    navController.navigatorProvider.addNavigator(WearNavigator())
 
     SwipeDismissableNavHost(
         navController = navController,

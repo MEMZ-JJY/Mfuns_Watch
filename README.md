@@ -1,8 +1,8 @@
-# 喵御宅手表客户端
+# Mfuns Watch
 
-喵御宅（mfuns.net）的非官方开源手表客户端，基于 Jetpack Compose for Wear OS 构建，**同时支持 Wear OS 手表与普通 Android 手表**（圆表盘、小屏均可）。
+Mfuns（mfuns.net）的非官方开源手表客户端，基于 Jetpack Compose for Wear OS 构建，**同时支持 Wear OS 手表与普通 Android 手表**（圆表盘、小屏均可）。
 
-数据来源于喵御宅社区公开接口（`api.mfuns.net`），仅供学习交流。
+数据来源于 Mfuns 社区公开接口（`api.mfuns.net`），仅供学习交流。
 
 ## 功能
 
@@ -43,6 +43,18 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 或把 APK 传到手表（微信文件传输 / 蓝牙 / ADB push）后点击安装。
 
+## 手表模拟器
+
+仓库内置 `run-emulator.bat`，双击即可启动已配置好的 Wear OS 模拟器（AVD 名 `MfunsWatch`，Wear OS 5.1，454×454 大圆表）。
+
+如需从零搭建，需要 SDK 中安装 `cmdline-tools` 与 `system-images;android-35-ext15;android-wear;x86_64`，然后：
+
+```bash
+avdmanager create avd -n MfunsWatch \
+  -k "system-images;android-35-ext15;android-wear;x86_64" \
+  -d wearos_large_round
+```
+
 ## 项目结构
 
 ```
@@ -68,4 +80,4 @@ MIT License，详见 [LICENSE](LICENSE)。
 
 ## 免责声明
 
-本项目为非官方第三方客户端，与喵御宅官方无关联。接口来自社区公开抓包整理，可能随官方调整而失效。
+本项目为非官方第三方客户端，与 Mfuns 官方无关联。接口来自社区公开抓包整理，可能随官方调整而失效。

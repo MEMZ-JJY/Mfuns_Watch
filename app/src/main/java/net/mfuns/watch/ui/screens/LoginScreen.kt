@@ -49,14 +49,9 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = "喵御宅",
+                text = "Mfuns Watch",
                 style = MaterialTheme.typography.title1,
                 color = MaterialTheme.colors.primary,
-            )
-            Text(
-                text = "手表客户端",
-                style = MaterialTheme.typography.caption2,
-                color = MaterialTheme.colors.onSurfaceVariant,
             )
             Spacer(Modifier.height(16.dp))
 

@@ -26,7 +26,7 @@ fun AboutScreen(
         item { ListHeader { Text("关于") } }
         item {
             Text(
-                text = "喵御宅手表客户端",
+                text = "Mfuns Watch",
                 style = MaterialTheme.typography.title3,
                 color = MaterialTheme.colors.primary,
             )
@@ -41,7 +41,7 @@ fun AboutScreen(
         }
         item {
             Text(
-                text = "数据来源于喵御宅社区公开接口（api.mfuns.net），" +
+                text = "数据来源于 Mfuns 社区公开接口（api.mfuns.net），" +
                     "为非官方第三方客户端，仅供学习交流使用。",
                 style = MaterialTheme.typography.caption2,
                 color = MaterialTheme.colors.onSurfaceVariant,

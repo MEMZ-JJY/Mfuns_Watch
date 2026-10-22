@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 喵御宅品牌粉 #FB7299（对齐 b 站粉） -->
     <style name="Theme.MfunsWatch" parent="android:Theme.DeviceDefault.NoActionBar">
         <item name="android:windowBackground">@android:color/black</item>
     </style>

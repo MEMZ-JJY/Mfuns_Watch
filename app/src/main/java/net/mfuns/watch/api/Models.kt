@@ -254,7 +254,7 @@ object Parser {
         val resource = params["resource"]?.asObj() ?: JsonObject(emptyMap())
         return NotifyItem(
             type = obj["type"]?.asInt() ?: fallbackType,
-            senderName = sender["name"]?.asString() ?: sender["username"]?.asString() ?: "喵御宅",
+            senderName = sender["name"]?.asString() ?: sender["username"]?.asString() ?: "Mfuns",
             avatar = coverUrl(sender["avatar"]?.asString() ?: sender["face"]?.asString() ?: ""),
             text = plainText(
                 params["reply_text"]?.asString() ?: params["text"]?.asString()
