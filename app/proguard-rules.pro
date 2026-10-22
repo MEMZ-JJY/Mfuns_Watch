@@ -14,5 +14,10 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
+# Wear navigation
+-keep class androidx.wear.compose.navigation.** { *; }
+-dontwarn androidx.wear.compose.navigation.**
+
 # media3
+-keep class androidx.media3.** { *; }
 -dontwarn androidx.media3.**
