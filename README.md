@@ -51,8 +51,11 @@ app/src/main/java/net/mfuns/watch/
 
 ## 开源许可
 
-[MIT](LICENSE)。
+[MIT](LICENSE)
+
 
 ## 免责声明
 
 本项目为非官方第三方客户端，与 Mfuns 官方无关联。接口来自社区及公开抓包整理，可能随官方调整而失效。
+
+本软件的bug为AI修复（因为我修不好自己写的bug）
