@@ -33,7 +33,7 @@ fun AboutScreen(
         }
         item {
             Text(
-                text = "版本 1.0.0\nWear OS 独立应用",
+                text = "版本 1.0.0\nhttps://moon9.top/",
                 style = MaterialTheme.typography.caption2,
                 color = MaterialTheme.colors.onSurfaceVariant,
                 textAlign = TextAlign.Center,
