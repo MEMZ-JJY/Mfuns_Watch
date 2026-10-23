@@ -55,6 +55,38 @@ data class CommentItem(
     val createdAt: Long?,
 )
 
+data class FeedItem(
+    val id: Int,
+    val userId: Int,
+    val userName: String,
+    val userAvatar: String,
+    val nameColor: String,
+    val content: String,
+    val images: List<String>,
+    val createdAt: Long?,
+    val likeCount: Int,
+    val commentCount: Int,
+    val viewCount: Int,
+    val commentAreaId: Int?,
+    val resourceType: Int,
+    val resourceId: Int?,
+    val reference: FeedReference?,
+    val tags: List<String>,
+)
+
+data class FeedReference(
+    val id: Int,
+    val type: Int,
+    val title: String,
+    val cover: String,
+    val summary: String,
+    val author: String,
+    val authorAvatar: String,
+    val likes: Int,
+    val comments: Int,
+    val views: Int,
+)
+
 data class MessageItem(
     val userId: Int,
     val userName: String,
@@ -236,6 +268,70 @@ object Parser {
         } else {
             list.mapNotNull { commentItem(it) }
         }
+    }
+
+    fun feedItem(raw: JsonElement): FeedItem? {
+        val obj = raw.asObj()
+        val user = obj["user"]?.asObj() ?: JsonObject(emptyMap())
+        val id = obj["id"]?.asInt() ?: obj["resource_id"]?.asInt() ?: return null
+        if (id == 0) return null
+        val extra = obj["extra"]?.asObj() ?: JsonObject(emptyMap())
+        val referenced = extra["resource"]?.asObj() ?: JsonObject(emptyMap())
+        val like = obj["like_status"]?.asObj()?.get("like")?.asObj() ?: JsonObject(emptyMap())
+        val images = extra["images"].asList().mapNotNull { el ->
+            val u = el.asString().ifEmpty { el.asObj()["url"]?.asString() ?: "" }
+            coverUrl(u).ifEmpty { null }
+        }
+        val reference = if (referenced.isNotEmpty()) {
+            val ruser = referenced["user"]?.asObj() ?: JsonObject(emptyMap())
+            FeedReference(
+                id = referenced["id"]?.asInt() ?: 0,
+                type = referenced["type"]?.asInt() ?: 0,
+                title = referenced["title"]?.asString()?.ifEmpty { "未命名内容" } ?: "未命名内容",
+                cover = coverUrl(referenced["cover"]?.asString() ?: ""),
+                summary = plainText(referenced["summary"]?.asString() ?: ""),
+                author = ruser["name"]?.asString() ?: ruser["username"]?.asString() ?: "",
+                authorAvatar = coverUrl(
+                    ruser["avatar"]?.asString() ?: ruser["face"]?.asString() ?: "",
+                ),
+                likes = referenced["like_count"]?.asInt() ?: 0,
+                comments = referenced["comment_count"]?.asInt() ?: 0,
+                views = referenced["view_count"]?.asInt() ?: 0,
+            )
+        } else {
+            null
+        }
+        val commentCount = obj["floor_count"]?.asInt() ?: obj["floor_num"]?.asInt() ?: 0
+        val tags = when (val t = obj["tags"]) {
+            is kotlinx.serialization.json.JsonPrimitive ->
+                t.asString().split(',').map { it.trim() }.filter { it.isNotEmpty() }
+            else -> t.asList().map { it.asString() }.filter { it.isNotEmpty() }
+        }
+        return FeedItem(
+            id = id,
+            userId = user["id"]?.asInt() ?: 0,
+            userName = user["name"]?.asString() ?: user["username"]?.asString() ?: "Mfuns 用户",
+            userAvatar = coverUrl(user["avatar"]?.asString() ?: user["face"]?.asString() ?: ""),
+            nameColor = user["name_color"]?.asString() ?: "",
+            content = plainText(obj["content"]?.asString() ?: ""),
+            images = images,
+            createdAt = parseTime(obj["created_at"] ?: obj["updated_at"]),
+            likeCount = like["count"]?.asInt() ?: 0,
+            commentCount = commentCount,
+            viewCount = obj["views"]?.asInt() ?: 0,
+            commentAreaId = obj["comment_area_id"]?.asInt(),
+            resourceType = obj["resource_type"]?.asInt() ?: ResourceType.FEED,
+            resourceId = obj["resource_id"]?.asInt(),
+            reference = reference,
+            tags = tags,
+        )
+    }
+
+    fun feedList(data: JsonElement?): List<FeedItem> {
+        val rawList = data.asList()
+            .ifEmpty { data.asObj()["list"].asList() }
+            .ifEmpty { data.asObj()["data"]?.asObj()?.get("list").asList() }
+        return rawList.mapNotNull { feedItem(it) }
     }
 
     fun messageItem(raw: JsonElement): MessageItem? {
@@ -423,7 +519,10 @@ object Parser {
     }
 
     fun coverUrl(raw: String): String {
-        val cover = raw.trim()
+        var cover = raw.trim()
+        if (cover.startsWith("http://", ignoreCase = true)) {
+            cover = "https://" + cover.removePrefix("http://")
+        }
         return when {
             cover.isEmpty() -> ""
             cover.startsWith("//") -> "https:$cover"
@@ -459,6 +558,16 @@ object Parser {
 
     private fun htmlToText(raw: String): String {
         var text = raw
+        // 表情贴图：保留其 alt 文案，例如 [mayday-5]
+        text = text.replace(
+            Regex("(?i)<img[^>]*class=[\"']sticker[\"'][^>]*alt=[\"']([^\"']*)[\"'][^>]*>"),
+            "$1 ",
+        )
+        text = text.replace(
+            Regex("(?i)<img[^>]*alt=[\"']([^\"']*)[\"'][^>]*class=[\"']sticker[\"'][^>]*>"),
+            "$1 ",
+        )
+        text = text
             .replace(Regex("(?i)<br\\s*/?>"), "\n")
             .replace(Regex("(?i)</p>"), "\n")
             .replace(Regex("<[^>]*>"), "")
@@ -525,8 +634,8 @@ class MfunsRepository(val api: ApiClient) {
     suspend fun hotRank(): List<ContentItem> =
         Parser.contentList(api.hotRank())
 
-    suspend fun timeline(page: Int, size: Int = 20): List<ContentItem> =
-        Parser.contentList(api.timelineFeeds(page, size))
+    suspend fun timeline(page: Int, size: Int = 20): List<FeedItem> =
+        Parser.feedList(api.timelineFeeds(page, size))
 
     suspend fun search(text: String, type: Int = -1, page: Int = 1): List<ContentItem> =
         Parser.contentList(api.search(text, type, page))

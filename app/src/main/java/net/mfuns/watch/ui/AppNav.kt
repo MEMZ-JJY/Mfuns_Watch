@@ -62,6 +62,7 @@ fun AppNavHost(
                 session = session,
                 onOpenDetail = { type, id -> navController.navigate(Routes.detail(type, id)) },
                 onOpenUser = { id -> navController.navigate(Routes.user(id)) },
+                onOpenComments = { areaId -> navController.navigate(Routes.comments(areaId)) },
                 onNavigate = { route ->
                     when (route) {
                         "about" -> navController.navigate(Routes.ABOUT)

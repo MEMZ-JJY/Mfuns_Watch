@@ -15,6 +15,7 @@ import net.mfuns.watch.api.CategoryItem
 import net.mfuns.watch.api.CommentItem
 import net.mfuns.watch.api.ContentDetail
 import net.mfuns.watch.api.ContentItem
+import net.mfuns.watch.api.FeedItem
 import net.mfuns.watch.api.FavoriteFolderItem
 import net.mfuns.watch.api.MessageItem
 import net.mfuns.watch.api.MessageRecord
@@ -104,8 +105,8 @@ class HomeViewModel : ViewModel() {
     private val _hot = MutableStateFlow<UiState<List<ContentItem>>>(UiState.Loading)
     val hot: StateFlow<UiState<List<ContentItem>>> = _hot.asStateFlow()
 
-    private val _timeline = MutableStateFlow<UiState<List<ContentItem>>>(UiState.Loading)
-    val timeline: StateFlow<UiState<List<ContentItem>>> = _timeline.asStateFlow()
+    private val _timeline = MutableStateFlow<UiState<List<FeedItem>>>(UiState.Loading)
+    val timeline: StateFlow<UiState<List<FeedItem>>> = _timeline.asStateFlow()
 
     init {
         loadAll()
@@ -121,9 +122,9 @@ class HomeViewModel : ViewModel() {
     fun loadHot() = launchLoad(_hot) { repo.hotRank() }
     fun loadTimeline() = launchLoad(_timeline) { repo.timeline(page = 1) }
 
-    private fun launchLoad(
-        target: MutableStateFlow<UiState<List<ContentItem>>>,
-        block: suspend () -> List<ContentItem>,
+    private fun <T> launchLoad(
+        target: MutableStateFlow<UiState<T>>,
+        block: suspend () -> T,
     ) {
         viewModelScope.launch {
             target.value = UiState.Loading

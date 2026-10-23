@@ -155,7 +155,7 @@ class ApiClient {
         return UserInfo(
             id = user["id"]?.asInt() ?: user["user_id"]?.asInt() ?: 0,
             name = user["name"]?.asString() ?: user["username"]?.asString() ?: "Mfuns 用户",
-            avatar = user["avatar"]?.asString() ?: user["face"]?.asString() ?: "",
+            avatar = Parser.coverUrl(user["avatar"]?.asString() ?: user["face"]?.asString() ?: ""),
         )
     }
 
